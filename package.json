@@ -1,15 +1,25 @@
 {
   "name": "google-drive-blobs",
-  "version": "0.0.0",
-  "description": "",
+  "version": "1.0.0",
+  "description": "a simple content-addressable blob store API on top of google drive",
   "main": "index.js",
   "scripts": {
     "test": "node test.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "max ogden",
+  "license": "bSD",
   "dependencies": {
     "debug": "^0.8.1",
+    "form-urlencoded": "0.0.6",
     "mime-types": "^1.0.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maxogden/google-drive-blobs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maxogden/google-drive-blobs/issues"
+  },
+  "homepage": "https://github.com/maxogden/google-drive-blobs"
 }
