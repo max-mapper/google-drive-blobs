@@ -21,17 +21,10 @@ test('constructor does not throw', function(t) {
 test('uploads a blob', function(t) {
   var blobs = gdb(tokens)
   
-  var ws = blobs.createWriteStream('test.js')
-  
-  ws.on('error', function(e) {
-    t.false(e, 'should not error')
-    console.log(e)
-    
-    t.end()
-  })
-  
-  ws.on('response', function(response) {
-    t.equal(response.title, 'test.js')
+  var ws = blobs.createWriteStream({filename: 'test.js'}, function(err, resp) {
+    t.false(err, 'should not error')
+    if (err) console.error(err)
+    t.equal(resp.hash, testmd5)
     t.end()
   })
   

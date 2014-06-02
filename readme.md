@@ -14,11 +14,13 @@ a simple content-addressable blob store API on top of google drive
 `client_id`: your google app client id
 `client_secret`: your google app client secret
 
-### blobs.createWriteStream(name)
+### blobs.createWriteStream(options, cb)
 
-returns a writable stream that you can pipe data to. `name` will be the filename in your drive
+returns a writable stream that you can pipe data to. 
 
-you can get the upload response JSON by binding a response event, e.g. `writeStream.on('response', function(response) { })`
+`options` should be an object that has options `filename` (will be the filename in your drive) and `parent` (google drive parent node) properties
+
+`cb` will be called with `(err, response)` where `response` is the response metadata
 
 ### blobs.createReadStream(md5)
 

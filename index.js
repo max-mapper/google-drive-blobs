@@ -17,13 +17,17 @@ function Blobs(options) {
 
 module.exports = Blobs
 
-Blobs.prototype.createWriteStream = function(filename, options) {
+Blobs.prototype.createWriteStream = function(options, cb) {
   var self = this
   
   if (!options) options = {}
   
+  var filename = options.filename
+  var mimeType
+  if (filename) {
+    mimeType = mime.lookup(filename)
+  }
   var parentID = options.parent
-  var mimeType = mime.lookup(filename)
 
   var metaOpts = {
     query: '?uploadType=resumable',
@@ -42,12 +46,11 @@ Blobs.prototype.createWriteStream = function(filename, options) {
   // always start by refreshing the token to make sure it's active
   self.refreshToken(function(err, resp, body) {
     if (err) {
-      console.log(body)
-      return proxy.emit('error', err)
+      return cb(err)
     }
     
     self.request(metaOpts, function(err, resp, body) {
-      if (err || resp.statusCode > 299) return proxy.emit('error', err || resp.headers)
+      if (err || resp.statusCode > 299) return cb(err || resp.headers)
       var parsed = url.parse(resp.headers.location, true)
       var session = parsed.query.upload_id
       upload(session)
@@ -70,7 +73,7 @@ Blobs.prototype.createWriteStream = function(filename, options) {
     })
     
     put.on('error', function(err) {
-      proxy.emit('error', err)
+      cb(err)
     })
     
     proxy.pipe(put)
@@ -79,8 +82,10 @@ Blobs.prototype.createWriteStream = function(filename, options) {
       return concat(function(body) {
         var response = JSON.parse(body)
         self.addProperty(response.id, 'hash', response.md5Checksum, function(err, resp, props) {
-          if (err) return proxy.emit('error', err)
-          proxy.emit('response', response)
+          if (err) return cb(err)
+          response.hash = md5Checksum
+          response.size = response.fileSize
+          cb(null, response)
         })
       })
     }
