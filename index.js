@@ -83,7 +83,7 @@ Blobs.prototype.createWriteStream = function(options, cb) {
         var response = JSON.parse(body)
         self.addProperty(response.id, 'hash', response.md5Checksum, function(err, resp, props) {
           if (err) return cb(err)
-          response.hash = md5Checksum
+          response.hash = response.md5Checksum
           response.size = response.fileSize
           cb(null, response)
         })
