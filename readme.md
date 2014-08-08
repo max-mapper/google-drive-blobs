@@ -2,6 +2,8 @@
 
 a simple content-addressable blob store API on top of google drive
 
+compatible with the [abstract-blob-store](https://github.com/maxogden/abstract-blob-store) API and passes its test suite
+
 [![NPM](https://nodei.co/npm/google-drive-blobs.png)](https://nodei.co/npm/google-drive-blobs/)
 
 ## API
@@ -22,7 +24,9 @@ returns a writable stream that you can pipe data to.
 
 `cb` will be called with `(err, response)` where `response` is the response metadata
 
-### blobs.createReadStream(md5)
+### blobs.createReadStream(opts)
+
+opts should be `{hash: md5}`
 
 returns a readable stream of data for the first file in your drive whose md5 checksum matches the `md5` argument
 
@@ -30,8 +34,10 @@ returns a readable stream of data for the first file in your drive whose md5 che
 
 gets google drive metadata for the first file in your drive whose md5 checksum matches the `md5` argument
 
-### blobs.remove(md5, cb)
+### blobs.remove(opts, cb)
 
+opts should be `{hash: md5}`
+ 
 deletes file by md5
 
 ### blobs.addProperty(fileId, key, val, cb)

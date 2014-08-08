@@ -3,6 +3,7 @@ var request = require('request')
 var concat = require('concat-stream')
 var mime = require('mime-types')
 var through = require('through2')
+var duplexify = require('duplexify')
 var formEncoder = require('form-urlencoded')
 var debug = require('debug')('google-drive-blobs')
 
@@ -83,8 +84,10 @@ Blobs.prototype.createWriteStream = function(options, cb) {
         var response = JSON.parse(body)
         self.addProperty(response.id, 'hash', response.md5Checksum, function(err, resp, props) {
           if (err) return cb(err)
+          if (resp.statusCode > 299) return cb(new Error(JSON.stringify(props)))
           response.hash = response.md5Checksum
-          response.size = response.fileSize
+          response.size = +response.fileSize
+          if (process.env['DEBUG']) debug('createWriteStream done', JSON.stringify(response))
           cb(null, response)
         })
       })
@@ -101,25 +104,28 @@ Blobs.prototype.addProperty = function(id, key, val, cb) {
   
   var reqOpts = {
     url: baseURL + 'files/' + id + '/properties',
-    json: hashProp
+    json: hashProp,
+    contentType: 'application/json'
   }
   
   return this.request(reqOpts, cb)
 }
 
-Blobs.prototype.createReadStream = function(hash) {
+Blobs.prototype.createReadStream = function(opts) {
   var self = this
-  var proxy = through()
-  
-  self.get(hash, function(err, file) {
-    if (err) return proxy.emit('error', err)
-    self.request({
+  var duplex = duplexify()
+  debug('createReadStream', JSON.stringify(opts))
+  self.get(opts.hash, function(err, file) {
+    if (err) return duplex.destroy(err)
+    if (!file) return duplex.destroy(new Error('Blob not found'))
+    var req = self.request({
       url: file.downloadUrl,
       method: 'GET',
-    }).pipe(proxy)
+    })
+    duplex.setReadable(req)
   })
   
-  return proxy
+  return duplex
 }
 
 Blobs.prototype.mkdir = function(filename, opts, cb) {
@@ -153,8 +159,12 @@ Blobs.prototype.request = function(opts, cb) {
   }
   
   if (opts.url) reqOpts.url = opts.url
-  
   return request(reqOpts, function(err, resp, body) {
+    if (process.env['DEBUG']) {
+      var bodyStr = body
+      if (bodyStr && typeof bodyStr.length === 'undefined') bodyStr = JSON.stringify(bodyStr)
+      debug(resp.statusCode, JSON.stringify(reqOpts), bodyStr)
+    }
     // token may have expired, refresh + retry
     if (resp.statusCode > 299) return self.refreshToken(function(err) {
       if (err) return cb(err)
@@ -181,10 +191,10 @@ Blobs.prototype.get = function(hash, cb) {
   })
 }
 
-Blobs.prototype.remove = function(hash, cb) {
+Blobs.prototype.remove = function(opts, cb) {
   var self = this
   
-  self.get(hash, function(err, file) {
+  self.get(opts.hash, function(err, file) {
     if (err) return cb(err)
     var reqOpts = {
       method: 'DELETE',
@@ -192,7 +202,7 @@ Blobs.prototype.remove = function(hash, cb) {
     }
   
     self.request(reqOpts, function(err, resp, results) {
-      if (err || resp.statusCode > 299) return cb(results)
+      if (err || resp.statusCode > 299) return cb(results || new Error('could not delete'))
       cb(null)
     })
   })
