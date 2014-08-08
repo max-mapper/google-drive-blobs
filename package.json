@@ -9,10 +9,13 @@
   "author": "max ogden",
   "license": "BSD",
   "dependencies": {
+    "concat-stream": "^1.4.6",
     "debug": "^0.8.1",
     "duplexify": "^3.1.0",
     "form-urlencoded": "0.0.6",
-    "mime-types": "^1.0.0"
+    "mime-types": "^1.0.0",
+    "request": "^2.40.0",
+    "through2": "^0.5.1"
   },
   "devDependencies": {
     "abstract-blob-store": "^1.0.4"
