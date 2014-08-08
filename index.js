@@ -128,6 +128,14 @@ Blobs.prototype.createReadStream = function(opts) {
   return duplex
 }
 
+Blobs.prototype.exists = function(opts, cb) {
+  var self = this
+  self.get(opts.hash, function(err, file) {
+    if (err) return cb(err)
+    cb(null, !!file)
+  })
+}
+
 Blobs.prototype.mkdir = function(filename, opts, cb) {
   var self = this
   var reqOpts = {
