@@ -82,10 +82,10 @@ Blobs.prototype.createWriteStream = function(options, cb) {
     function handleUploadResponse() {
       return concat(function(body) {
         var response = JSON.parse(body)
-        self.addProperty(response.id, 'hash', response.md5Checksum, function(err, resp, props) {
+        self.addProperty(response.id, 'key', response.md5Checksum, function(err, resp, props) {
           if (err) return cb(err)
           if (resp.statusCode > 299) return cb(new Error(JSON.stringify(props)))
-          response.hash = response.md5Checksum
+          response.key = response.md5Checksum
           response.size = +response.fileSize
           if (process.env['DEBUG']) debug('createWriteStream done', JSON.stringify(response))
           cb(null, response)
@@ -115,7 +115,7 @@ Blobs.prototype.createReadStream = function(opts) {
   var self = this
   var duplex = duplexify()
   debug('createReadStream', JSON.stringify(opts))
-  self.get(opts.hash, function(err, file) {
+  self.get(opts.key, function(err, file) {
     if (err) return duplex.destroy(err)
     if (!file) return duplex.destroy(new Error('Blob not found'))
     var req = self.request({
@@ -130,7 +130,7 @@ Blobs.prototype.createReadStream = function(opts) {
 
 Blobs.prototype.exists = function(opts, cb) {
   var self = this
-  self.get(opts.hash, function(err, file) {
+  self.get(opts.key, function(err, file) {
     if (err) return cb(err)
     cb(null, !!file)
   })
@@ -184,7 +184,7 @@ Blobs.prototype.request = function(opts, cb) {
 
 Blobs.prototype.get = function(hash, cb) {
   var self = this
-  var query = "properties has { key='hash' and value='" + hash + "' and visibility='PRIVATE' } and trashed = false"
+  var query = "properties has { key='key' and value='" + hash + "' and visibility='PRIVATE' } and trashed = false"
   var reqOpts = {
     contentType: 'application/json',
     query: '?' + formEncoder.encode({q: query}),
@@ -202,7 +202,7 @@ Blobs.prototype.get = function(hash, cb) {
 Blobs.prototype.remove = function(opts, cb) {
   var self = this
   
-  self.get(opts.hash, function(err, file) {
+  self.get(opts.key, function(err, file) {
     if (err) return cb(err)
     var reqOpts = {
       method: 'DELETE',

@@ -38,7 +38,7 @@ test('uploads a blob', function(t) {
   var ws = blobs.createWriteStream({filename: 'test.js'}, function(err, resp) {
     t.false(err, 'should not error')
     if (err) console.error(err)
-    t.equal(resp.hash, testmd5)
+    t.equal(resp.key, testmd5)
     t.end()
   })
 
@@ -58,7 +58,7 @@ test('gets blob metadata by md5', function(t) {
 test('gets a blob', function(t) {
   var blobs = gdb(tokens)
 
-  var ws = blobs.createReadStream({hash: testmd5})
+  var ws = blobs.createReadStream({key: testmd5})
 
   ws.on('error', function(e) {
     t.error(e)
@@ -74,7 +74,7 @@ test('gets a blob', function(t) {
 test('deletes a blob', function(t) {
   var blobs = gdb(tokens)
 
-  var ws = blobs.remove({hash: testmd5}, function(err) {
+  var ws = blobs.remove({key: testmd5}, function(err) {
     t.false(err, 'snould not err')
     blobs.get(testmd5, function(err, file) {
       t.false(err, 'should not err')

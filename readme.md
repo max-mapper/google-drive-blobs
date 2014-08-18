@@ -26,7 +26,7 @@ returns a writable stream that you can pipe data to.
 
 ### blobs.createReadStream(opts)
 
-opts should be `{hash: md5}`
+opts should be `{key: md5}`
 
 returns a readable stream of data for the first file in your drive whose md5 checksum matches the `md5` argument
 
@@ -36,7 +36,7 @@ gets google drive metadata for the first file in your drive whose md5 checksum m
 
 ### blobs.remove(opts, cb)
 
-opts should be `{hash: md5}`
+opts should be `{key: md5}`
  
 deletes file by md5
 

@@ -1,6 +1,6 @@
 {
   "name": "google-drive-blobs",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "a simple content-addressable streaming blob store API on top of google drive",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
     "through2": "^0.5.1"
   },
   "devDependencies": {
-    "abstract-blob-store": "^1.1.1"
+    "abstract-blob-store": "^2.0.1"
   },
   "repository": {
     "type": "git",
